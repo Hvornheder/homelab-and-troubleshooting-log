@@ -33,7 +33,7 @@ homelab-and-troubleshooting-log/
 
 | # | Title | Date | Skills Covered | Status |
 |---|---|---|---|---|
-| 01 | [Windows Boot Failure & RAID 0 Recovery](incidents/incident-01-windows-boot-failure-raid-recovery.md) | May 2026 | BIOS firmware, AMD RAID, WinPE driver injection, BCD reconstruction, Linux CLI diagnostics | ✅ Resolved |
+| 01 | [Windows Boot Failure & RAID 0 Recovery](incident-01-windows-boot-failure-raid-recovery.md) | May 2026 | BIOS firmware, AMD RAID, WinPE driver injection, BCD reconstruction, Linux CLI diagnostics | ✅ Resolved |
 
 ---
 
