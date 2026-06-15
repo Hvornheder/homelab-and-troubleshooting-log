@@ -72,5 +72,5 @@ This section will grow with each new entry. Current coverage includes:
 
 ## Connect
 
-- **LinkedIn:** [linkedin.com/in/huntervornheder](https://linkedin.com/in/huntervornheder)
+- **LinkedIn:** [linkedin.com/in/huntervornheder](https://linkedin.com/in/hvornheder)
 - **GitHub:** [github.com/Hvornheder](https://github.com/Hvornheder)
