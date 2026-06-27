@@ -138,3 +138,115 @@ apt-get update && apt-get upgrade -y
 ```
 
 All packages updated successfully. Error resolved.
+
+## Incident 04 — TrueNAS ZFS Pool Creation: Duplicate Serial Number Error
+ 
+**Date:** June 2026
+**System:** TrueNAS SCALE VM 101
+**Severity:** Medium — blocked pool creation
+ 
+### What Happened
+ 
+When attempting to create the ZFS RAID-1 mirror pool using both IronWolf drives, TrueNAS threw the following error:
+ 
+```
+Topology: Disks have duplicate serial numbers: None (sda, sdb, sdc)
+```
+ 
+This was unexpected because both drives have distinct serial numbers (ZW640YJC and ZW640YMY), confirmed visually in both Proxmox hardware view and TrueNAS disk list.
+ 
+### Root Cause
+ 
+When Proxmox passes physical drives through to a VM using the `qm set` command without explicitly specifying the serial number parameter, the serial number metadata is not forwarded to the guest OS. TrueNAS sees all passed-through disks as having no serial number, which it interprets as duplicate serials across all drives including the boot disk.
+ 
+### Resolution
+ 
+Re-ran the passthrough commands with the `,serial=` parameter appended explicitly:
+ 
+```bash
+qm set 101 -scsi1 /dev/disk/by-id/ata-ST4000VN006-3CW104_ZW640YJC,serial=ZW640YJC
+qm set 101 -scsi2 /dev/disk/by-id/ata-ST4000VN006-3CW104_ZW640YMY,serial=ZW640YMY
+```
+ 
+A full power cycle of the VM (not just a reboot) was required for TrueNAS to recognize the updated serial information. After power cycle, pool creation succeeded without errors.
+ 
+### What I Would Do Differently
+ 
+Include the `,serial=` parameter on the initial passthrough command. This is a known gotcha with TrueNAS on Proxmox and should be standard practice when passing through drives for ZFS pool use.
+ 
+---
+ 
+## Incident 05 — TrueNAS VM Memory Misconfiguration
+ 
+**Date:** June 2026
+**System:** TrueNAS SCALE VM 101
+**Severity:** Medium — would have caused ZFS instability under load
+ 
+### What Happened
+ 
+Initial VM creation set memory to 7630 MiB with ballooning enabled. Two separate issues were identified after creation:
+ 
+1. 7630 MiB is approximately 7.45 GiB, below the 8 GiB minimum for TrueNAS SCALE
+2. Ballooning enabled, incompatible with ZFS memory management
+### Why This Matters
+ 
+ZFS uses a memory caching system called ARC (Adaptive Replacement Cache) that aggressively claims available RAM for read caching. It assumes stable memory allocation and does not handle Proxmox dynamically reclaiming RAM via ballooning. Running ZFS with ballooning enabled can cause cache instability, degraded performance, and in severe cases filesystem errors.
+ 
+### Resolution
+ 
+- Shut down VM
+- Increased memory to 16384 MiB (16.00 GiB exactly — 16 × 1024)
+- Unchecked Ballooning Device
+- Confirmed fixed allocation with no minimum/maximum spread
+### What I Would Do Differently
+ 
+Disable ballooning and set correct MiB values before first boot. Note: 8 GiB = 8192 MiB and 16 GiB = 16384 MiB, Google's unit conversion for MiB is unreliable and should not be used for this calculation.
+ 
+---
+ 
+## Incident 06 — TrueNAS Boot Disk Undersized
+ 
+**Date:** June 2026
+**System:** TrueNAS SCALE VM 101
+**Severity:** Low — would cause issues at future update time
+ 
+### What Happened
+ 
+TrueNAS boot disk was created at 8 GiB. TrueNAS SCALE documentation and community consensus indicates 16 GiB minimum for the boot pool to accommodate OS, logs, and future update images stored during the update process.
+ 
+### Resolution
+ 
+With VM running: Storage → VM 101 → Hardware → selected boot disk → Disk Action → Resize Disk → increased by 8 GiB to reach 16 GiB total. Change confirmed in TrueNAS UI.
+ 
+---
+ 
+## Incident 07 — UPS Driver Not Connected
+ 
+**Date:** June 2026
+**System:** TrueNAS SCALE VM 101
+**Severity:** Medium — UPS monitoring non-functional
+ 
+### What Happened
+ 
+After configuring the UPS service in TrueNAS with driver `usbhid-ups`, running `upsc ups@localhost` in the TrueNAS shell returned:
+ 
+```
+Error: Driver not connected
+```
+ 
+### Diagnostic Process
+ 
+Ran `lsusb` on the Proxmox host — CyberPower UPS appeared.
+Ran `lsusb` inside TrueNAS shell — CyberPower UPS did not appear.
+ 
+The USB device was connected to the physical host but not passed through to the TrueNAS VM. TrueNAS could not communicate with a device it couldn't see.
+ 
+### Resolution
+ 
+Proxmox web UI → VM 101 → Hardware → Add → USB Device → selected CyberPower CP1500PFCLCD (port 1-6). After adding the passthrough, `lsusb` in TrueNAS confirmed the device was visible. Restarting the UPS service and running `upsc ups@localhost` returned full UPS telemetry.
+ 
+### Key Lesson
+ 
+Any USB device plugged into the physical host is invisible to VMs by default. USB passthrough must be explicitly configured in Proxmox for each device that a VM needs to access. This applies to the UPS, external drives, and any other USB peripherals.
+ 
+---
