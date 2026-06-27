@@ -7,11 +7,11 @@ This homelab project was inspired by my hands-on experience gained during a shad
 ---
 
 ## Project Status
-
+ 
 | Phase | Description | Status |
 |-------|-------------|--------|
 | Phase 1 | Hardware procurement, physical setup, Proxmox installation | ✅ Complete |
-| Phase 2 | TrueNAS SCALE VM + RAID-1 ZFS photo storage | 🔄 In progress |
+| Phase 2 | TrueNAS SCALE VM + RAID-1 ZFS photo storage | ✅ Complete |
 | Phase 3 | pfSense VM — software firewall and router | 📋 Planned |
 | Phase 4 | WireGuard VPN — secure remote access | 📋 Planned |
 | Phase 5 | VLAN segmentation and DMZ architecture | 📋 Planned |
@@ -21,19 +21,21 @@ This homelab project was inspired by my hands-on experience gained during a shad
 ---
 
 ## Documentation
-
+ 
 | File | Contents |
 |------|----------|
 | [hardware.md](hardware.md) | Full hardware stack, selection rationale, specs |
 | [proxmox-setup.md](proxmox-setup.md) | Installation steps, configuration, commands run |
 | [network-topology.md](network-topology.md) | Network diagrams, switch port assignments, IP scheme |
 | [planned-phases.md](planned-phases.md) | Roadmap for remaining phases with step-by-step breakdown |
-| [troubleshooting.md](troubleshooting.md) | BIOS recovery incident and other issues encountered |
+| [truenas-setup.md](truenas-setup.md) | TrueNAS SCALE VM configuration, RAID-1 pool, datasets, UPS integration |
+| [resiliency-testing.md](resiliency-testing.md) | UPS, network, and shutdown failure testing results |
+| [troubleshooting.md](troubleshooting.md) | BIOS recovery, TrueNAS configuration issues, and other incidents |
 
 ---
 
 ## Skills at a Glance
-
+ 
 `Proxmox VE` `Type-1 hypervisor` `ZFS / RAID-1` `TrueNAS SCALE` `pfSense` `WireGuard VPN` `VLAN segmentation` `Linux CLI` `Dell firmware management` `UPS / power engineering` `managed switch` `network topology design` `3-2-1 backup strategy` `defense in depth` `CIA triad`
 
 ---
